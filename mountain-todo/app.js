@@ -2188,7 +2188,7 @@ function performUndo() {
         .map(letter => ({
             ...letter,
             endSize: letter.endSize || CONFIG.fontSize,
-            trail: [],
+            particles: [],
         }));
 
     const animLetters = layoutUndoFloatTargets(undoLetters, CW, mountainTopY, mountainHeight);
@@ -2296,7 +2296,8 @@ function updateUndoAnimation() {
             undoAnim._targetRing = null;
         }
     } else if (undoAnim.phase === 'trailFade') {
-        if (t >= 1) {
+        const allParticlesDead = undoAnim.letters.every(al => !al.particles || al.particles.length === 0);
+        if (t >= 1 && allParticlesDead) {
             undoAnim = null;
             saveTolocalStorage();
         }
@@ -2339,8 +2340,7 @@ function drawUndoAnimation() {
             sz = al.startSize + (al.endSize - al.startSize) * localEt;
             angle = 0;
             if (localT > 0 && localT < 1) {
-                al.trail.push({ x, y, sz, angle: 0 });
-                if (al.trail.length > 6) al.trail.shift();
+                al.particles.push({ x, y, sz, life: 120 });
             }
         }
 
@@ -2352,21 +2352,15 @@ function drawUndoAnimation() {
     textFont('TWKLausanne');
 
     if (undoAnim.phase === 'returning' || undoAnim.phase === 'trailFade') {
+        noStroke();
         for (const al of undoAnim.letters) {
-            if (!al.trail || al.trail.length === 0) continue;
-            const trailFadeScale = undoAnim.phase === 'trailFade'
-                ? 1 - Math.min(1, elapsed / Math.max(1, undoAnim.duration))
-                : 1;
-            for (let i = 0; i < al.trail.length; i++) {
-                const ghost = al.trail[i];
-                const ageT = (i + 1) / al.trail.length;
-                fill(0, 20 * ageT * trailFadeScale);
-                push();
-                translate(ghost.x, ghost.y);
-                rotate(ghost.angle || 0);
-                textSize(ghost.sz);
-                text(al.char, 0, 0);
-                pop();
+            if (!al.particles || al.particles.length === 0) continue;
+            for (let i = al.particles.length - 1; i >= 0; i--) {
+                const p = al.particles[i];
+                p.life -= 3;
+                fill(0, p.life * 0.06);
+                ellipse(p.x, p.y, p.sz * 0.6, p.sz * 0.6);
+                if (p.life <= 0) al.particles.splice(i, 1);
             }
         }
     }

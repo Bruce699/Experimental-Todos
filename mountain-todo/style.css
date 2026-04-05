@@ -190,7 +190,7 @@ html, body {
     border-radius: 50%;
     cursor: pointer;
     margin-top: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    transition: opacity 0.24s ease, transform 0.24s ease, background-color 0.24s ease, border-color 0.24s ease;
     position: relative;
     box-sizing: content-box;
     padding: 0;
@@ -218,12 +218,12 @@ html, body {
 /* Completing animation on ring */
 .todo-ring.completing {
     border-color: #2F2F2F;
-    animation: ringPulse 0.3s ease-out;
+    animation: ringPulse 0.36s ease-out;
 }
 
 @keyframes ringPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); border-color: #2F2F2F; }
+    0% { transform: scale(1); opacity: 1; }
+    40% { transform: scale(1.25); border-color: #2F2F2F; opacity: 0.85; }
     100% { transform: scale(0.8); opacity: 0; }
 }
 
