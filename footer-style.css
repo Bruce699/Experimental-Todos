@@ -1,0 +1,37 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    overflow: auto;
+    background: #000;
+    font-family: 'Inter', 'Poppins', sans-serif;
+    color: #fff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0;
+}
+
+.footer-stage {
+    width: 1443px;
+    height: 421px;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+}
+
+#canvas-root,
+#canvas-root canvas {
+    width: 1443px !important;
+    height: 421px !important;
+    display: block;
+}

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typographic Gravity</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Menu toggle button -->
+    <button class="menu-toggle" id="menu-toggle" onclick="togglePanel()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+    </button>
+
+    <!-- Floating control panel -->
+    <div class="panel" id="panel">
+        <div class="panel-header">
+            <h1>Typographic Gravity</h1>
+            <button class="panel-close" onclick="togglePanel()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="panel-body">
+            <!-- Seed -->
+            <div class="control-section">
+                <h3>Seed</h3>
+                <input type="text" class="seed-input" id="seed-input" value="12345" onchange="updateSeed()">
+                <div class="seed-controls">
+                    <button class="btn" onclick="previousSeed()">← Prev</button>
+                    <button class="btn" onclick="nextSeed()">Next →</button>
+                </div>
+                <button class="btn full" onclick="randomSeedAndUpdate()">Random Seed</button>
+            </div>
+
+            <!-- Parameters -->
+            <div class="control-section">
+                <h3>Parameters</h3>
+
+                <div class="control-group">
+                    <label>Gravity</label>
+                    <div class="slider-row">
+                        <input type="range" id="gravity" min="0.1" max="3" step="0.1" value="1.0" oninput="updateParam('gravity', this.value)">
+                        <span class="val" id="gravity-value">1.00</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Letter Size</label>
+                    <div class="slider-row">
+                        <input type="range" id="letterSize" min="24" max="120" step="2" value="40" oninput="updateParam('letterSize', this.value)">
+                        <span class="val" id="letterSize-value">40</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Bounce</label>
+                    <div class="slider-row">
+                        <input type="range" id="bounce" min="0" max="0.8" step="0.05" value="0.2" oninput="updateParam('bounce', this.value)">
+                        <span class="val" id="bounce-value">0.20</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Friction</label>
+                    <div class="slider-row">
+                        <input type="range" id="friction" min="0.01" max="1" step="0.01" value="0.6" oninput="updateParam('friction', this.value)">
+                        <span class="val" id="friction-value">0.60</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Agent Speed</label>
+                    <div class="slider-row">
+                        <input type="range" id="agentSpeed" min="0.5" max="4" step="0.25" value="1.5" oninput="updateParam('agentSpeed', this.value)">
+                        <span class="val" id="agentSpeed-value">1.50</span>
+                    </div>
+                </div>
+
+                <!-- Random size checkbox -->
+                <div class="control-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="randomSize" onchange="params.randomSize = this.checked">
+                        <span class="checkmark"></span>
+                        Random Size
+                    </label>
+                    <span class="checkbox-hint">Randomizes between 50%–100% of letter size</span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="control-section">
+                <h3>Stats</h3>
+                <div class="stats">
+                    Letters: <span id="stat-letters">0</span><br>
+                    Pile height: <span id="stat-height">0</span>px<br>
+                    Agent altitude: <span id="stat-agent">0</span>px<br>
+                    Sleeping: <span id="stat-sleeping">0</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="control-section">
+                <h3>Actions</h3>
+                <div class="btn-row">
+                    <button class="btn" onclick="resetParameters()">Reset</button>
+                    <button class="btn" onclick="clearLetters()">Clear</button>
+                </div>
+                <button class="btn primary full" onclick="exportImage()">Download PNG</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="sketch.js"></script>
+</body>
+</html>
