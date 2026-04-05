@@ -5,6 +5,15 @@
 // order) are connected by distance constraints capped at 1.2×
 // their original spacing. The "string" is invisible — only the
 // letters are rendered as DOM elements.
+//
+// Architecture: This file implements a custom Verlet-integration
+// physics engine for elastic string animations. Each completed
+// todo item becomes an "elastic string" of letter particles
+// connected by distance constraints. The letters fall with
+// gravity while maintaining their string connections. The engine
+// runs at a fixed 120Hz timestep (driven by App.jsx) and writes
+// positions directly to LetterPoint objects, which the React
+// layer reads each frame to update DOM transforms.
 // ═══════════════════════════════════════════════════════════════
 
 export const DEFAULT_CONFIG = {
@@ -112,6 +121,12 @@ export class PhysicsWorld {
   }
 
   // Build one string per wrapped line. Index 0 of each string is pinned (left end fixed).
+  //
+  // Groups characters into visual lines (by y-position clustering) and creates
+  // one ElasticString per line. Rest lengths between consecutive letters —
+  // multiplied by constraintDist — define how far apart letters can drift before
+  // the distance constraint snaps them back. A constraintDist of 1.0 means
+  // letters stay at their exact original spacing; values >1.0 allow slack.
   addStrings(id, text, charData, lineHeight, font) {
     if (charData.length === 0) return []
 
@@ -173,6 +188,12 @@ export class PhysicsWorld {
       str.active = false
       str.targetOpacity = this.config.crossedOffOpacity
 
+      // Two cross-off modes:
+      // - String mode: keeps the first letter pinned (like a nail in the wall) and
+      //   unravels right-to-left, progressively unlocking letters like pulling a
+      //   thread. The distance constraints keep it connected as a dangling string.
+      // - Falling mode: drops all letters at once with small random velocity kicks,
+      //   so they scatter independently (no constraints enforced).
       if (this.config.stringMode) {
         // String mode: unravel from right, keep index 0 pinned
         str.unraveling = true
@@ -275,7 +296,10 @@ export class PhysicsWorld {
         }
       }
 
-      // Verlet integration
+      // Verlet integration: position-based physics where velocity is implicit
+      // (current pos - previous pos). Each frame, we compute velocity from the
+      // positional delta, apply damping to bleed energy, then advance position
+      // by velocity + gravity. No explicit velocity variable is stored.
       for (const lp of s.letters) {
         if (lp.locked) continue
         const vx = (lp.x - lp.px) * cfg.damping
@@ -286,7 +310,11 @@ export class PhysicsWorld {
         lp.y += vy + cfg.gravity * this.gravityY
       }
 
-      // Distance constraints (string mode only)
+      // Distance constraints (string mode only): iteratively enforces max distance
+      // between consecutive letters. If two letters drift farther apart than their
+      // rest length, they are pulled back toward each other. Multiple iterations
+      // (cfg.iterations) converge toward a stable solution — more iterations = stiffer
+      // string. This is what gives the "elastic string" feel.
       if (!cfg.stringMode) continue
       for (let iter = 0; iter < cfg.iterations; iter++) {
         for (let i = 0; i < s.letters.length - 1; i++) {
@@ -316,12 +344,18 @@ export class PhysicsWorld {
       }
     }
 
-    // Inter-string collision
+    // Inter-string collision: prevents overlapping letter clusters from different
+    // strings (or non-adjacent letters within the same string) by pushing apart
+    // any two unlocked letters closer than 2× collisionRadius.
     if (cfg.collisionEnabled) {
       this.resolveCollisions(cfg, LH)
     }
 
-    // Static body collision (elastic letters vs active todo item rectangles)
+    // Static body collision: letters collide with the bounding boxes of active
+    // (uncompleted) todo items. This creates the visual of crossed-off text
+    // falling *around* the remaining list items rather than passing through them.
+    // For each letter, find the closest point on each rectangle and push the
+    // letter out if it overlaps.
     if (this.staticBodies.length > 0) {
       for (const s of this.strings) {
         if (s.active) continue
@@ -349,7 +383,9 @@ export class PhysicsWorld {
       }
     }
 
-    // Boundary constraints
+    // Boundary constraints: keeps letters on-screen by clamping to ground, left
+    // wall, and right wall. Reflects the previous position to simulate bounce
+    // (the Verlet equivalent of reversing velocity on collision).
     for (const s of this.strings) {
       if (s.active) continue
       for (const lp of s.letters) {

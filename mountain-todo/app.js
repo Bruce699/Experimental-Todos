@@ -141,6 +141,15 @@ const glyphCache = {};
 const traceCanvas = document.createElement('canvas');
 const traceCtx = traceCanvas.getContext('2d', { willReadFrequently: true });
 
+// GLYPH EXTRACTION PIPELINE
+// Renders each character to an offscreen canvas, then extracts its shape for physics.
+// Steps:
+//   1) Render char at target size on a scratch canvas
+//   2) Threshold alpha channel to a binary grid (opaque vs transparent)
+//   3) Find boundary pixels (edges where opaque meets transparent)
+//   4) Compute convex hull (Andrew's monotone chain algorithm)
+//   5) Simplify hull with Ramer-Douglas-Peucker to <=12 vertices for physics efficiency
+//   6) Cache the result keyed by char+size so each glyph is only traced once
 function getGlyphData(char, size) {
     const key = char + '|' + size;
     if (glyphCache[key]) return glyphCache[key];
@@ -223,6 +232,8 @@ function getGlyphData(char, size) {
 // ═══════════════════════════════════════════════════════════════
 // GEOMETRY UTILS
 // ═══════════════════════════════════════════════════════════════
+// Andrew's monotone chain: O(n log n) convex hull. Builds lower+upper hull
+// chains using cross-product orientation test.
 function convexHull(points) {
     let pts = points.slice().sort((a,b) => a.x-b.x || a.y-b.y);
     if (pts.length <= 2) return pts.slice();
@@ -244,6 +255,8 @@ function cross2(o,a,b) {
     return (a.x-o.x)*(b.y-o.y) - (a.y-o.y)*(b.x-o.x);
 }
 
+// Ramer-Douglas-Peucker: recursively removes points within epsilon of the line
+// between endpoints. Reduces vertex count while preserving shape.
 function rdpSimplify(pts, eps) {
     if (pts.length <= 2) return pts;
     let dmax=0, idx=0, end=pts.length-1;
@@ -319,6 +332,8 @@ function spawnFallingLettersFromPositions(charPositions, batchEl, batchId) {
     }
 }
 
+// Right-to-left stagger cascade: rightmost characters fall first, creating a
+// visual "peeling" effect. Delay is proportional to distance from the right edge.
 function spawnFallingChars(charPositions, batchEl, size, batchId) {
     const maxX = Math.max(...charPositions.map(cp => cp.x));
     const minX = Math.min(...charPositions.map(cp => cp.x));
@@ -538,7 +553,10 @@ function updateActiveLetters() {
             al.settleTimer = 0;
         }
 
-        // After sleeping for a while, freeze into mountain
+        // Letters that have been sleeping (at rest) in the physics engine for 60+
+        // frames get "frozen": their position/angle is saved to settledLetters, and
+        // their physics body is converted to static so future letters can pile on
+        // top. This is the mountain-building mechanism.
         if (al.settleTimer > 60) {
             // Compute scaled size based on y position (same logic as rendering)
             const CH = AppState.canvasH;
@@ -649,6 +667,9 @@ function rebuildHeightmap() {
 // ═══════════════════════════════════════════════════════════════
 // MOUNTAIN PROFILE — generate smooth profile from settled letters
 // ═══════════════════════════════════════════════════════════════
+// Generates a smooth 1D heightmap from settled letters. Each letter contributes
+// a small elevation bump at its x-position. The result is smoothed with a box
+// filter (radius=6) to create the mountain silhouette used for rendering layers.
 function getMountainProfile(dayData, canvasW, groundY) {
     if (!dayData || dayData.settledLetters.length === 0) return null;
 
@@ -684,6 +705,9 @@ function getMountainProfile(dayData, canvasW, groundY) {
 // ═══════════════════════════════════════════════════════════════
 // CLIMBING AGENT
 // ═══════════════════════════════════════════════════════════════
+// Climbing agent: searches the heightmap for the highest peak and smoothly
+// walks/climbs toward it. Uses simple spring-like physics for movement and
+// procedural limb animation (walk cycle derived from sin waves).
 class Climber {
     constructor(CW, groundY) {
         this.x = CW / 2;
@@ -1251,6 +1275,12 @@ function addNewTodoItem(day, text) {
 // ═══════════════════════════════════════════════════════════════
 // COMPLETE TODO — trigger falling letters
 // ═══════════════════════════════════════════════════════════════
+// Completion flow:
+//   1) Measure each character's DOM position via Range API
+//   2) Spawn physics bodies at those positions (with optional RTL stagger)
+//   3) Animate ring collapse (CSS class "completing")
+//   4) Once all pending letters are released, collapse the todo item from the
+//      list with FLIP animation and push to undo stack
 function completeTodo(item, li, day) {
     if (!item.text.trim()) return;
 
@@ -1703,7 +1733,7 @@ function setupGUI() {
 function createUndoButton() {
     const btn = document.createElement('div');
     btn.id = 'undo-button';
-    btn.innerHTML = `<img src="undo-button.svg" width="40" height="40">`;
+    btn.innerHTML = `<img src="../assets/icons/undo-button.svg" width="40" height="40">`;
     btn.style.cssText = `
         position: absolute;
         width: 40px; height: 40px;
@@ -2107,6 +2137,11 @@ function revealRestoredTodo(targetTextEl, targetRing) {
     }
 }
 
+// Undo has two animation phases:
+//   1) RISING — letters float upward from their settled mountain positions to a
+//      staging area above the mountain (staggered by character index)
+//   2) RETURNING — letters fly back to their original positions in the todo list,
+//      then the item is re-inserted and revealed with a fade-in
 function performUndo() {
     if (undoStack.length === 0 || undoAnim) return;
 

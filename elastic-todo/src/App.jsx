@@ -43,6 +43,11 @@ function addDays(d, n) {
 // ═══════════════════════════════════════════════════════════════
 const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' })
 
+// Uses the Pretext library (@chenglou/pretext) for proper text layout and line
+// breaking, then maps each grapheme cluster to an (x, y) position relative to
+// the container. These positions become the initial physics coordinates for each
+// letter particle. Canvas measureText provides per-grapheme widths, while Pretext
+// handles word-wrap decisions to match the browser's actual line breaks.
 function measureCharPositions(text, font, maxWidth, lineHeight, offsetX, offsetY) {
   if (!text) return []
 
@@ -149,12 +154,22 @@ export default function App() {
       physicsRef.current = new PhysicsWorld(CONFIG)
     }
 
+    // Fixed-timestep physics: we accumulate real elapsed time and step the
+    // simulation at exactly 120Hz regardless of the display's frame rate.
+    // This ensures deterministic behavior — the physics produces the same
+    // result whether the browser runs at 60fps or 144fps. MAX_STEPS caps
+    // how many ticks we process per frame to prevent spiral-of-death when
+    // the tab is backgrounded and a large dt spike arrives.
     const FIXED_DT = 1 / 120
     const MAX_STEPS = 4
     let accumulator = 0
     let lastTime = -1
     let animId = 0
 
+    // Reads the current DOM bounding boxes of active (uncompleted) todo items
+    // and feeds them to the physics engine as rectangular collision obstacles.
+    // This bridges the React-rendered layout with the physics world so that
+    // falling letters bounce off the visible list items.
     function updateStaticBodies() {
       const world = physicsRef.current
       const frame = frameRef.current
@@ -272,6 +287,11 @@ export default function App() {
   // ═══════════════════════════════════════════════════════════════
   // CROSS OFF A TODO
   // ═══════════════════════════════════════════════════════════════
+  // Cross-off flow: measure character positions from the DOM -> create physics
+  // string(s) (one per wrapped line) -> create absolutely-positioned DOM <span>
+  // for each letter -> trigger physics unlocking (crossOffItem) -> mark the
+  // todo as completed so React hides the original text. From this point on,
+  // the animation loop drives the spans via physics positions each frame.
   function handleComplete(item) {
     if (!item.text.trim()) return
 

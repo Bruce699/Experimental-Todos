@@ -4,7 +4,7 @@
     {
       "name": "mountain-todo",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "mountain-todo", "-l", "3456", "--no-clipboard"],
+      "runtimeArgs": ["serve", ".", "-l", "3456", "--no-clipboard"],
       "port": 3456
     },
     {
@@ -13,6 +13,12 @@
       "runtimeArgs": ["run", "dev", "--", "--port", "3457"],
       "port": 3457,
       "cwd": "elastic-todo"
+    },
+    {
+      "name": "typographic-gravity",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", ".", "-l", "3458", "--no-clipboard"],
+      "port": 3458
     }
   ]
 }
