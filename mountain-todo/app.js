@@ -57,8 +57,8 @@ const CONFIG = {
     staggerDelay: 1.2,
 
     // Undo
-    undoRiseTime: 1.0,       // seconds — letters float up
-    undoReturnTime: 0.6,     // seconds — letters return to list position
+    undoRiseTime: 0.7,       // seconds — letters float up
+    undoReturnTime: 0.5,     // seconds — letters return to list position
     undoFloatColor: '#5030EF',
 };
 
@@ -700,6 +700,7 @@ class Climber {
         this.armPhase = 0;
         this.isClimbing = false;
         this.lookUpTimer = 0; // frames remaining in lookUp pose
+        this.lookUpBlend = 0; // 0 = normal, 1 = full lookUp pose
     }
 
     findHighest(heightmap, CW, groundY) {
@@ -1752,15 +1753,17 @@ function showUndoButton() {
     const headY = climber.y - climber.headR + 1;
     const btnX = climber.x - 20;
     const btnY = headY - 16 - 40;
+    // Distance from climber head to button center
+    const riseDistance = headY - (btnY + 20);
 
     undoButtonEl.style.display = 'block';
     undoButtonEl.style.left = btnX + 'px';
     undoButtonEl.style.top = btnY + 'px';
     undoButtonEl.style.transition = 'none';
     undoButtonEl.style.opacity = '0';
-    undoButtonEl.style.transform = 'scale(0.2) translateY(16px)';
+    undoButtonEl.style.transform = `scale(0.2) translateY(${riseDistance}px)`;
 
-    // Force reflow then animate in with spring curve
+    // Force reflow then animate in with spring curve — rises up from climber's head
     undoButtonEl.offsetHeight;
     undoButtonEl.style.transition = 'opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
     undoButtonEl.style.opacity = '1';
@@ -1772,9 +1775,14 @@ function showUndoButton() {
 function hideUndoButton() {
     if (!undoButtonEl || !undoButtonVisible) return;
 
+    const climber = AppState.climber;
+    const headY = climber ? climber.y - climber.headR + 1 : 0;
+    const btnY = parseFloat(undoButtonEl.style.top) || 0;
+    const riseDistance = headY - (btnY + 20);
+
     undoButtonEl.style.transition = 'opacity 0.25s ease-out, transform 0.25s ease-out';
     undoButtonEl.style.opacity = '0';
-    undoButtonEl.style.transform = 'scale(0.2) translateY(16px)';
+    undoButtonEl.style.transform = `scale(0.2) translateY(${riseDistance}px)`;
 
     setTimeout(() => {
         if (!undoButtonVisible) {
@@ -2078,8 +2086,12 @@ function layoutUndoFloatTargets(letters, canvasW, mountainTopY, mountainHeight) 
 function revealRestoredTodo(targetTextEl, targetRing) {
     if (targetTextEl) {
         targetTextEl.style.visibility = 'visible';
+        targetTextEl.style.opacity = '0';
         targetTextEl.style.transition = 'none';
-        targetTextEl.style.opacity = '1';
+        requestAnimationFrame(() => {
+            targetTextEl.style.transition = 'opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+            targetTextEl.style.opacity = '1';
+        });
     }
 
     if (targetRing) {
@@ -2088,7 +2100,7 @@ function revealRestoredTodo(targetTextEl, targetRing) {
         targetRing.style.transform = 'scale(0.84)';
         targetRing.style.transition = 'none';
         requestAnimationFrame(() => {
-            targetRing.style.transition = 'opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1), transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)';
+            targetRing.style.transition = 'opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
             targetRing.style.opacity = '1';
             targetRing.style.transform = 'scale(1)';
         });
@@ -2194,18 +2206,9 @@ function performUndo() {
     const animLetters = layoutUndoFloatTargets(undoLetters, CW, mountainTopY, mountainHeight);
 
     if (animLetters.length > 0) {
-        const minStartX = Math.min(...animLetters.map(letter => letter.sx));
-        const maxStartX = Math.max(...animLetters.map(letter => letter.sx));
-        const startRangeX = Math.max(1, maxStartX - minStartX);
-        const maxRiseDelay = Math.min(220, Math.max(70, animLetters.length * 12));
-        const minEndX = Math.min(...animLetters.map(letter => letter.ex));
-        const maxEndX = Math.max(...animLetters.map(letter => letter.ex));
-        const endRangeX = Math.max(1, maxEndX - minEndX);
-        const maxReturnDelay = Math.min(260, Math.max(80, animLetters.length * 16));
-
-        for (const letter of animLetters) {
-            letter.riseDelay = ((letter.sx - minStartX) / startRangeX) * maxRiseDelay;
-            letter.returnDelay = ((letter.ex - minEndX) / endRangeX) * maxReturnDelay;
+        const maxStagger = Math.min(864, Math.max(230, animLetters.length * 40.3));
+        for (let i = 0; i < animLetters.length; i++) {
+            animLetters[i].staggerDelay = (i / Math.max(1, animLetters.length - 1)) * maxStagger;
         }
     }
 
@@ -2219,26 +2222,26 @@ function performUndo() {
     // Set climber to lookUp mode
     AppState.climber.lookUpTimer = 120; // frames
 
-    const riseBaseDuration = CONFIG.undoRiseTime * 1000;
-    const returnBaseDuration = CONFIG.undoReturnTime * 1000;
+    const totalDuration = (CONFIG.undoRiseTime + CONFIG.undoReturnTime) * 1000;
+    const maxStagger = animLetters.reduce((max, al) => Math.max(max, al.staggerDelay || 0), 0);
 
-    // Start staggered rise/return sequence
+    // Single unified floating phase
     undoAnim = {
-        phase: 'rising',
+        phase: 'floating',
         letters: animLetters,
         startTime: performance.now(),
-        duration: riseBaseDuration + animLetters.reduce((maxDelay, letter) => Math.max(maxDelay, letter.riseDelay || 0), 0),
-        riseBaseDuration,
-        returnBaseDuration,
+        duration: totalDuration + maxStagger,
+        baseDuration: totalDuration,
         trailFadeDuration: 360,
-        maxReturnDelay: animLetters.reduce((maxDelay, letter) => Math.max(maxDelay, letter.returnDelay || 0), 0),
         mountainSnapshot,
         text: entry.text,
         _targetTextEl: targetTextEl,
         _targetRing: targetRing,
+        _revealed: false,
     };
 
-    hideUndoButton();
+    // Hide undo button only if stack is now empty
+    if (undoStack.length === 0) hideUndoButton();
     saveTolocalStorage();
 }
 
@@ -2279,15 +2282,17 @@ function updateUndoAnimation() {
     const elapsed = now - undoAnim.startTime;
     const t = Math.min(1, elapsed / undoAnim.duration);
 
-    if (undoAnim.phase === 'rising') {
+    if (undoAnim.phase === 'floating') {
         if (t >= 1) {
-            undoAnim.phase = 'returning';
+            // All letters arrived — start cross-fade
+            undoAnim.phase = 'crossFade';
             undoAnim.startTime = performance.now();
-            undoAnim.duration = undoAnim.returnBaseDuration + undoAnim.maxReturnDelay;
-        }
-    } else if (undoAnim.phase === 'returning') {
-        if (t >= 1) {
+            undoAnim.duration = 500; // cross-fade duration in ms
             revealRestoredTodo(undoAnim._targetTextEl, undoAnim._targetRing);
+            // Keep mountainSnapshot alive through crossFade so the pile doesn't jump
+        }
+    } else if (undoAnim.phase === 'crossFade') {
+        if (t >= 1) {
             undoAnim.phase = 'trailFade';
             undoAnim.startTime = performance.now();
             undoAnim.duration = undoAnim.trailFadeDuration || 360;
@@ -2321,53 +2326,100 @@ function drawUndoAnimation() {
             continue;
         }
 
-        if (undoAnim.phase === 'rising') {
-            const localT = Math.max(0, Math.min(1, (elapsed - (al.riseDelay || 0)) / undoAnim.riseBaseDuration));
-            const dipPortion = 0.16;
-            x = al.sx;
-            if (localT <= dipPortion) {
-                y = al.sy + (al.dipY - al.sy) * easeUndoFloat(localT / dipPortion);
-            } else {
-                y = al.dipY + (al.fy - al.dipY) * easeUndoFloat((localT - dipPortion) / (1 - dipPortion));
-            }
-            sz = al.startSize;
-            angle = (al.startAngle || 0) * (1 - easeUndoFloat(localT));
-        } else if (undoAnim.phase === 'returning') {
-            const localT = Math.max(0, Math.min(1, (elapsed - (al.returnDelay || 0)) / undoAnim.returnBaseDuration));
-            const localEt = easeInOutCubic(localT);
-            x = al.fx + (al.ex - al.fx) * localEt;
-            y = al.fy + (al.ey - al.fy) * localEt;
-            sz = al.startSize + (al.endSize - al.startSize) * localEt;
-            angle = 0;
-            if (localT > 0 && localT < 1) {
-                al.particles.push({ x, y, sz, life: 120 });
-            }
-        }
+        if (undoAnim.phase === 'floating') {
+            const localT = Math.max(0, Math.min(1, (elapsed - (al.staggerDelay || 0)) / undoAnim.baseDuration));
 
-        drawStates.push({ char: al.char, x, y, sz, angle });
+            // Direct position interpolation through 3 waypoints:
+            // t=0: start (sx,sy)  →  t=0.4: apex (fx,fy)  →  t=0.55: dip  →  t=1: end (ex,ey)
+            // Dip target is 10% back from apex toward start in Y
+            const apexT = 0.4;
+            const dipT = 0.55;
+            const dipFrac = 0.10; // how far back toward start
+
+            if (localT <= apexT) {
+                // Rise to apex — use ease-out for smooth deceleration at top
+                const segT = localT / apexT;
+                const e = 1 - Math.pow(1 - segT, 3); // ease-out cubic
+                x = al.sx + (al.fx - al.sx) * e;
+                y = al.sy + (al.fy - al.sy) * e;
+                sz = al.startSize;
+                angle = (al.startAngle || 0) * (1 - e);
+            } else if (localT <= dipT) {
+                // Dip: ease down slightly from apex
+                const segT = (localT - apexT) / (dipT - apexT);
+                const dipY = al.fy + (al.sy - al.fy) * dipFrac;
+                const e = Math.sin(segT * Math.PI); // smooth bump 0→1→0
+                x = al.fx;
+                y = al.fy + (dipY - al.fy) * e;
+                sz = al.startSize;
+                angle = 0;
+            } else {
+                // Return to end — ease-in-out for fluid continuation
+                const segT = (localT - dipT) / (1 - dipT);
+                const e = segT * segT * segT * (segT * (segT * 6 - 15) + 10); // smootherstep — steeper mid-section
+                x = al.fx + (al.ex - al.fx) * e;
+                y = al.fy + (al.ey - al.fy) * e;
+                sz = al.startSize + (al.endSize - al.startSize) * e;
+                angle = 0;
+            }
+
+            // Spawn particles throughout, but stop early so they die before landing
+            if (localT > 0 && localT < 0.82) {
+                al.particles.push({ x, y, sz, life: 80 });
+            }
+
+            drawStates.push({ char: al.char, x, y, sz, angle, opacity: 1 });
+        } else if (undoAnim.phase === 'crossFade') {
+            // Letters hold at final position and fade out
+            x = al.ex;
+            y = al.ey;
+            sz = al.endSize;
+            angle = 0;
+            const fadeT = Math.min(1, elapsed / undoAnim.duration);
+            drawStates.push({ char: al.char, x, y, sz, angle, opacity: 1 - fadeT });
+        }
     }
 
     noStroke();
     textAlign(CENTER, CENTER);
     textFont('TWKLausanne');
 
-    if (undoAnim.phase === 'returning' || undoAnim.phase === 'trailFade') {
+    if (undoAnim.phase === 'floating' || undoAnim.phase === 'crossFade' || undoAnim.phase === 'trailFade') {
         noStroke();
+        const globalT = Math.min(1, elapsed / undoAnim.duration);
+        // Fast decay — particles have life=80, decay at 5+, so they die well before landing
+        const decayRate = undoAnim.phase === 'trailFade' ? 12 : (5 + globalT * 15);
         for (const al of undoAnim.letters) {
             if (!al.particles || al.particles.length === 0) continue;
             for (let i = al.particles.length - 1; i >= 0; i--) {
                 const p = al.particles[i];
-                p.life -= 3;
-                fill(0, p.life * 0.06);
+                p.life -= decayRate;
+                fill(0, Math.max(0, p.life) * 0.06);
                 ellipse(p.x, p.y, p.sz * 0.6, p.sz * 0.6);
                 if (p.life <= 0) al.particles.splice(i, 1);
             }
         }
     }
 
-    fill(baseColor);
+    // Draw lines between neighboring letters
+    if (drawStates.length > 1 && undoAnim.phase === 'floating') {
+        const globalT = Math.min(1, elapsed / undoAnim.duration);
+        // Lines fade out in the second half of the motion
+        const lineFade = globalT < 0.5 ? 1 : 1 - (globalT - 0.5) / 0.5;
+        stroke(0, 51 * lineFade);
+        strokeWeight(1);
+        for (let i = 0; i < drawStates.length - 1; i++) {
+            const a = drawStates[i];
+            const b = drawStates[i + 1];
+            line(a.x, a.y, b.x, b.y);
+        }
+        noStroke();
+    }
 
     for (const state of drawStates) {
+        const c = color(CONFIG.textColor);
+        c.setAlpha(255 * (state.opacity ?? 1));
+        fill(c);
         push();
         translate(state.x, state.y);
         rotate(state.angle || 0);
