@@ -1,4 +1,4 @@
-# Keyboard-Text Interaction
+# Experimental Todos
 
 A collection of experimental interactive prototypes exploring the intersection of **typography**, **physics simulation**, and **task management UI**. Each project transforms text into a physical medium — letters that fall, bounce, pile up, and form landscapes.
 
@@ -17,7 +17,7 @@ A collection of experimental interactive prototypes exploring the intersection o
 ## Repository Structure
 
 ```
-Keyboard-Text Interaction/
+Experimental Todos/
 ├── assets/                      # Shared assets across all projects
 │   ├── fonts/                   # TWKLausanne font (weights 250–500, WOFF2)
 │   └── icons/                   # Shared SVG icons (chevron, undo)
@@ -41,12 +41,7 @@ Keyboard-Text Interaction/
 ├── typographic-gravity/         # Interactive typing + physics canvas
 │   ├── sketch.js                # p5.js + Matter.js physics simulation
 │   ├── style.css                # Dark theme control panel styles
-│   ├── index.html               # Main demo page
-│   ├── footer-sketch.js         # Footer-sized variant (scripted typing)
-│   ├── footer-style.css         # Footer variant styles
-│   └── footer.html              # Footer demo page (1443×421px fixed)
-│
-└── TWKLausanne/                 # Full font family source (Desktop OTF + Web WOFF2)
+└── └── index.html               # Main demo page
 ```
 
 ---
