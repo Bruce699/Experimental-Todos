@@ -48,9 +48,6 @@ Experimental Todos/
 
 ## Shared Technology
 
-### Font: TWKLausanne
-All three projects use the **TWKLausanne** typeface (weights 250–500). The web-ready WOFF2 files are in `assets/fonts/`. The full font family source (all weights 50–1000 in OTF and WOFF2) is preserved in `TWKLausanne/`.
-
 ### Core Algorithms (shared across projects)
 These algorithms appear in both Typographic Gravity and Mountain Todo:
 
