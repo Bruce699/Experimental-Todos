@@ -24,7 +24,7 @@ const CONFIG = {
     // Typography
     fontSize: 19,
     lineSpacing: 1.4,
-    font: '300 19px TWKLausanne, sans-serif',
+    font: '400 19px Inter, sans-serif',
 
     // Physics
     gravity: 1.2,
@@ -162,7 +162,7 @@ function getGlyphData(char, size) {
 
     traceCtx.clearRect(0, 0, cw, ch);
     traceCtx.fillStyle = 'white';
-    traceCtx.font = `300 ${size}px TWKLausanne, sans-serif`;
+    traceCtx.font = `400 ${size}px Inter, sans-serif`;
     traceCtx.textBaseline = 'alphabetic';
     traceCtx.textAlign = 'left';
     traceCtx.fillText(char, pad, ch - pad - size * 0.2);
@@ -215,7 +215,7 @@ function getGlyphData(char, size) {
     charCanvas.width = cw; charCanvas.height = ch;
     const charCtx = charCanvas.getContext('2d');
     charCtx.fillStyle = 'white';
-    charCtx.font = `300 ${size}px TWKLausanne, sans-serif`;
+    charCtx.font = `400 ${size}px Inter, sans-serif`;
     charCtx.textBaseline = 'alphabetic';
     charCtx.textAlign = 'left';
     charCtx.fillText(char, pad, ch - pad - size * 0.2);
@@ -1583,7 +1583,7 @@ function drawMountainLayer(dayData, opacity, yOffset, CW, CH, blurPx) {
         translate(0, yOffset);
         drawingContext.globalAlpha = opacity;
         fill(CONFIG.mountainBaseColor); noStroke();
-        textAlign(CENTER, CENTER); textFont('TWKLausanne');
+        textAlign(CENTER, CENTER); textFont('Inter');
         for (const sl of dayData.settledLetters) {
             push();
             translate(sl.x, sl.y);
@@ -1608,7 +1608,7 @@ function drawMountainLayer(dayData, opacity, yOffset, CW, CH, blurPx) {
     ctx.textBaseline = 'middle';
     for (const sl of dayData.settledLetters) {
         const sz = sl.size || CONFIG.letterSize;
-        ctx.font = `500 ${sz}px Inter, sans-serif`;
+        ctx.font = `400 ${sz}px Inter, sans-serif`;
         ctx.save();
         ctx.translate(sl.x, sl.y);
         if (sl.angle) ctx.rotate(sl.angle);
@@ -1733,7 +1733,7 @@ function setupGUI() {
 function createUndoButton() {
     const btn = document.createElement('div');
     btn.id = 'undo-button';
-    btn.innerHTML = `<img src="../assets/icons/undo-button.svg" width="40" height="40">`;
+    btn.innerHTML = `<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="20" fill="black" fill-opacity="0.05"/><path d="M29.3183 20.3444C29.3185 22.5851 28.4362 24.7358 26.8625 26.3309C25.2888 27.926 23.1503 28.8371 20.9097 28.8672H20.7955C18.6197 28.8717 16.5256 28.0389 14.9472 26.5413C14.75 26.3551 14.6349 26.0981 14.6271 25.8269C14.6194 25.5558 14.7197 25.2926 14.9059 25.0954C15.0922 24.8982 15.3491 24.7831 15.6203 24.7753C15.8914 24.7676 16.1546 24.8678 16.3518 25.0541C17.2776 25.9281 18.4404 26.5099 19.695 26.7268C20.9495 26.9437 22.2402 26.786 23.4056 26.2735C24.5711 25.7611 25.5597 24.9165 26.2479 23.8453C26.9361 22.7742 27.2933 21.5239 27.275 20.2509C27.2566 18.9779 26.8635 17.7385 26.1448 16.6876C25.426 15.6367 24.4135 14.8209 23.2338 14.3422C22.054 13.8635 20.7594 13.7431 19.5116 13.996C18.2638 14.2489 17.1182 14.864 16.218 15.7643C16.2069 15.7754 16.1967 15.7856 16.1847 15.7958L14.5646 17.2762H16.0228C16.2941 17.2762 16.5542 17.384 16.746 17.5758C16.9378 17.7676 17.0455 18.0277 17.0455 18.299C17.0455 18.5702 16.9378 18.8304 16.746 19.0222C16.5542 19.2139 16.2941 19.3217 16.0228 19.3217H11.9319C11.6607 19.3217 11.4005 19.2139 11.2087 19.0222C11.0169 18.8304 10.9092 18.5702 10.9092 18.299V14.2081C10.9092 13.9368 11.0169 13.6767 11.2087 13.4849C11.4005 13.2931 11.6607 13.1853 11.9319 13.1853C12.2032 13.1853 12.4633 13.2931 12.6551 13.4849C12.8469 13.6767 12.9546 13.9368 12.9546 14.2081V15.974L14.7853 14.2984C15.9793 13.1109 17.4982 12.3037 19.1505 11.9786C20.8028 11.6536 22.5144 11.8253 24.0692 12.4722C25.624 13.119 26.9523 14.2119 27.8865 15.613C28.8207 17.014 29.3189 18.6605 29.3183 20.3444Z" fill="#888888"/></svg>`;
     btn.style.cssText = `
         position: absolute;
         width: 40px; height: 40px;
@@ -2148,11 +2148,14 @@ function performUndo() {
     const entry = undoStack.pop();
     const day = getDayData(AppState.currentDate);
     const previousItemRects = captureTodoItemRects();
-    const mountainSnapshot = day.settledLetters.map(sl => ({ ...sl }));
 
     // Pull out all letters for this undo batch, regardless of whether
     // they're still pending, actively falling, or already settled.
     const settledLetters = collectUndoSettledLetters(day, entry);
+
+    // Snapshot AFTER removing undo letters so the pile doesn't include
+    // ghosts of letters that are being animated away.
+    const mountainSnapshot = day.settledLetters.map(sl => ({ ...sl }));
     const activeUndoLetters = collectUndoLettersFromActive(entry);
     const pendingUndoLetters = collectUndoLettersFromPending(entry);
 
@@ -2196,8 +2199,56 @@ function performUndo() {
         }
     }
 
-    // Use original char positions recorded at cross-off time for return targets
-    const originalPositions = entry.originalCharPositions || [];
+    // Clear any FLIP transforms on the target item so measurement is accurate
+    const todoArea = document.getElementById('todo-area');
+    let targetLi = null;
+    if (targetTextEl) {
+        targetLi = targetTextEl.closest('.todo-item');
+    }
+    if (targetLi) {
+        targetLi.style.transition = 'none';
+        targetLi.style.transform = '';
+    }
+
+    // Scroll so the re-inserted item is visible (as second-to-last).
+    // We jump instantly to measure accurate positions, then jump back
+    // and smooth-scroll so the visual transition is clean.
+    const savedScrollTop = todoArea ? todoArea.scrollTop : 0;
+    let needsScroll = false;
+    let targetScrollTop = savedScrollTop;
+
+    if (targetLi && todoArea) {
+        const areaRect = todoArea.getBoundingClientRect();
+        const liRect = targetLi.getBoundingClientRect();
+        const isVisible = liRect.top >= areaRect.top && liRect.bottom <= areaRect.bottom;
+        if (!isVisible) {
+            needsScroll = true;
+            // Position item as second-to-last visible: item bottom + one item gap from area bottom
+            const nextSibling = targetLi.nextElementSibling;
+            const itemBelowH = nextSibling ? nextSibling.offsetHeight + 10 : 40;
+            targetScrollTop = Math.max(0,
+                targetLi.offsetTop - todoArea.clientHeight + targetLi.offsetHeight + itemBelowH
+            );
+            // Jump to target scroll for accurate measurement
+            todoArea.scrollTop = targetScrollTop;
+        }
+    }
+
+    // Measure FRESH char positions from the re-inserted DOM element
+    let freshPositions = [];
+    if (targetTextEl) {
+        targetTextEl.style.visibility = 'visible';
+        targetTextEl.style.opacity = '0';
+        freshPositions = getCharPositions(targetTextEl);
+        targetTextEl.style.visibility = 'hidden';
+    }
+    const originalPositions = freshPositions.length > 0 ? freshPositions : (entry.originalCharPositions || []);
+
+    // Jump back and smooth-scroll to the target position
+    if (needsScroll && todoArea) {
+        todoArea.scrollTop = savedScrollTop;
+        todoArea.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+    }
 
     // Compute mountain height for float target
     const CW = AppState.canvasW;
@@ -2417,7 +2468,7 @@ function drawUndoAnimation() {
 
     noStroke();
     textAlign(CENTER, CENTER);
-    textFont('TWKLausanne');
+    textFont('Inter');
 
     if (undoAnim.phase === 'floating' || undoAnim.phase === 'crossFade' || undoAnim.phase === 'trailFade') {
         noStroke();
@@ -2585,7 +2636,7 @@ function setup() {
     // Rebuild static collision bodies from existing settled letters
     rebuildStaticBodiesFromSettled();
 
-    textFont('TWKLausanne');
+    textFont('Inter');
 
     // Create undo button
     undoButtonEl = createUndoButton();
@@ -2675,7 +2726,7 @@ function draw() {
     fill(CONFIG.textColor);
     noStroke();
     textAlign(CENTER, CENTER);
-    textFont('TWKLausanne');
+    textFont('Inter');
     for (const pl of pendingLetters) {
         textSize(pl.size);
         if (pl.type === 'word') {
@@ -2692,7 +2743,7 @@ function draw() {
     fill(CONFIG.mountainBaseColor);
     noStroke();
     textAlign(CENTER, CENTER);
-    textFont('TWKLausanne');
+    textFont('Inter');
     const scaleZoneStart = CH * 0.8; // top of bottom 20%
     for (const al of activeLetters) {
         const b = al.body;

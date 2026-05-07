@@ -37,7 +37,7 @@ export const DEFAULT_CONFIG = {
   fontSize: 19,
   lineHeight: 27,
   lineSpacing: 1.4,
-  font: '300 19px TWKLausanne, sans-serif',
+  font: '400 19px Inter, sans-serif',
 
   // Physics
   stringMode: false,         // false = falling letters, true = elastic string

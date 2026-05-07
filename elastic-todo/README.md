@@ -40,7 +40,7 @@ elastic-todo/
 │   ├── style.css        # All styles, font-face, layout
 │   └── main.jsx         # Entry point
 ├── public/
-│   ├── fonts/           # TWKLausanne WOFF2 (250, 300, 400, 500)
+│   ├── fonts/           # (Removed — Inter loaded from Google Fonts)
 │   └── chevron-left.svg # Navigation arrow
 ├── index.html           # HTML shell
 ├── package.json         # Dependencies

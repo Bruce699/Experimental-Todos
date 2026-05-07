@@ -592,7 +592,7 @@ export default function App() {
 
     const visual = gui.addFolder('Visual')
     visual.add(CONFIG, 'fontSize', 10, 24, 1).name('Font Size').onChange(v => {
-      CONFIG.font = `300 ${v}px TWKLausanne, sans-serif`
+      CONFIG.font = `400 ${v}px Inter, sans-serif`
       CONFIG.lineHeight = Math.round(v * CONFIG.lineSpacing)
       document.querySelectorAll('.todo-text').forEach(el => el.style.fontSize = v + 'px')
     })

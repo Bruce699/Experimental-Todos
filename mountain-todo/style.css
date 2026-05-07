@@ -2,37 +2,8 @@
    Mountain Todo — Styles (redesigned)
    ═══════════════════════════════════════════════════════════════ */
 
-@font-face {
-    font-family: 'TWKLausanne';
-    src: url('../assets/fonts/TWKLausanne-250.woff2') format('woff2');
-    font-weight: 250;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'TWKLausanne';
-    src: url('../assets/fonts/TWKLausanne-300.woff2') format('woff2');
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'TWKLausanne';
-    src: url('../assets/fonts/TWKLausanne-400.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'TWKLausanne';
-    src: url('../assets/fonts/TWKLausanne-500.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
+/* Original demo uses TWK Lausanne; replaced here with Inter (open-source, Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap');
 
 * {
     margin: 0;
@@ -46,7 +17,7 @@ html, body {
     height: 100%;
     overflow: hidden;
     background: #FFFFFF;
-    font-family: 'TWKLausanne', 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 /* App frame — full screen, no border */
@@ -73,7 +44,7 @@ html, body {
 }
 
 #date-display {
-    font-family: 'TWKLausanne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 24px;
     font-weight: 400;
     color: #2F2F2F;
@@ -90,7 +61,7 @@ html, body {
     padding: 10px;
 }
 
-.date-nav img {
+.date-nav svg {
     width: 10.4px;
     height: 20.8px;
     display: block;
@@ -112,7 +83,7 @@ html, body {
 
 /* Todo area */
 #todo-area {
-    flex: 0 0 auto;
+    flex: 1 1 0;
     overflow-y: auto;
     padding: 50px 36px calc(36px + env(safe-area-inset-bottom) + 8vh);
     padding: 50px 36px calc(36px + env(safe-area-inset-bottom) + 8svh);
@@ -122,7 +93,10 @@ html, body {
     min-height: 0;
     -webkit-mask-image: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.28) 3%,
+        rgba(0, 0, 0, 0.78) 7%,
+        rgba(0, 0, 0, 1) 12%,
         rgba(0, 0, 0, 1) 72%,
         rgba(0, 0, 0, 0.78) 86%,
         rgba(0, 0, 0, 0.28) 95%,
@@ -130,7 +104,10 @@ html, body {
     );
     mask-image: linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.28) 3%,
+        rgba(0, 0, 0, 0.78) 7%,
+        rgba(0, 0, 0, 1) 12%,
         rgba(0, 0, 0, 1) 72%,
         rgba(0, 0, 0, 0.78) 86%,
         rgba(0, 0, 0, 0.28) 95%,
@@ -142,23 +119,6 @@ html, body {
     mask-size: 100% 100%;
 }
 
-#todo-area::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: min(18vh, 136px);
-    background: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.55) 48%,
-        rgba(255, 255, 255, 0.9) 78%,
-        rgba(255, 255, 255, 1) 100%
-    );
-    pointer-events: none;
-    z-index: 2;
-}
 
 #todo-area::-webkit-scrollbar {
     display: none;
@@ -233,9 +193,9 @@ html, body {
     background: none;
     border: none;
     color: #1E1E1E;
-    font-family: 'TWKLausanne', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 19px;
-    font-weight: 300;
+    font-weight: 400;
     line-height: 1.4;
     outline: none;
     padding: 0;

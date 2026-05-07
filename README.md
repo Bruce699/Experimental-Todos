@@ -19,7 +19,7 @@ A collection of experimental interactive prototypes exploring the intersection o
 ```
 Experimental Todos/
 ├── assets/                      # Shared assets across all projects
-│   ├── fonts/                   # TWKLausanne font (weights 250–500, WOFF2)
+│   ├── fonts/                   # (Font files removed — Inter loaded from Google Fonts)
 │   └── icons/                   # Shared SVG icons (chevron, undo)
 │
 ├── elastic-todo/                # React + Vite todo app with elastic string physics

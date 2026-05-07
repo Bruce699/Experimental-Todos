@@ -1,34 +1,5 @@
-@font-face {
-  font-family: 'TWKLausanne';
-  src: url('/fonts/TWKLausanne-300.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'TWKLausanne';
-  src: url('/fonts/TWKLausanne-250.woff2') format('woff2');
-  font-weight: 250;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'TWKLausanne';
-  src: url('/fonts/TWKLausanne-400.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'TWKLausanne';
-  src: url('/fonts/TWKLausanne-500.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+/* Original demo uses TWK Lausanne; replaced here with Inter (open-source, Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap');
 
 * {
   margin: 0;
@@ -42,7 +13,7 @@ html, body, #root {
   height: 100%;
   overflow: hidden;
   background: #FFFFFF;
-  font-family: 'TWKLausanne', 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* App frame — full screen, no border */
@@ -90,7 +61,7 @@ html, body, #root {
 }
 
 #date-display {
-  font-family: 'TWKLausanne', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 24px;
   font-weight: 400;
   color: #0099FF;
@@ -207,9 +178,9 @@ html, body, #root {
   background: none;
   border: none;
   color: #353535;
-  font-family: 'TWKLausanne', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 19px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.4;
   outline: none;
   padding: 0;

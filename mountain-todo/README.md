@@ -21,7 +21,7 @@ A full-screen todo application where completing tasks causes their text to **fal
 - **Navigate dates** — chevron arrows switch between days (each day has its own list + mountain)
 
 ### Visual Design
-- Clean white background with dark text (TWKLausanne 300 weight, 19px)
+- Clean white background with dark text (Inter 300 weight, 19px — the original demo uses TWK Lausanne, replaced here with the open-source Inter font)
 - Todo list fades into the mountain zone via CSS mask gradient
 - Mountain rendered as multi-layer silhouettes with decreasing opacity and increasing blur
 - Climber rendered as a simple stick figure with procedural walk/climb animation
