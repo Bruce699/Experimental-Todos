@@ -8,13 +8,6 @@
       "port": 3456
     },
     {
-      "name": "elastic-todo",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3457"],
-      "port": 3457,
-      "cwd": "elastic-todo"
-    },
-    {
       "name": "typographic-gravity",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", ".", "-l", "3458", "--no-clipboard"],
