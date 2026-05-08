@@ -1,6 +1,6 @@
 # Experimental Todos
 
-A collection of experimental interactive prototypes exploring the intersection of **typography**, **physics simulation**, and **task management UI**. Each project transforms text into a physical medium — letters that fall, bounce, pile up, and form landscapes.
+An experiment that originated from a p5.js practice — exploring the intersection of **typography**, **physics simulation**, and **interactive UI**. Each prototype transforms text into a physical medium — letters that fall, bounce, pile up, and form landscapes.
 
 ---
 
