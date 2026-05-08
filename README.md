@@ -19,7 +19,7 @@ A collection of experimental interactive prototypes exploring the intersection o
 ```
 Experimental Todos/
 ├── assets/                      # Shared assets across all projects
-│   ├── fonts/                   # (Font files removed — Inter loaded from Google Fonts)
+│   ├── fonts/                   # Self-hosted Inter (.woff2, weights 200/300/400/500/600)
 │   └── icons/                   # Shared SVG icons (chevron, undo)
 │
 ├── elastic-todo/                # React + Vite todo app with elastic string physics
@@ -87,8 +87,8 @@ npx serve . -l 3458
 
 ---
 
-## Design Principles
+## Typography
 
-1. **Text as physical material** — Every character has mass, shape, and collision geometry derived from its actual glyph outline.
-2. **Completion = transformation** — Finishing a task doesn't just check a box; it transforms the text into a physical event (falling, piling, mountaineering).
-3. **Emergent landscapes** — The visual output is a direct product of the user's productivity — more completed todos = taller mountains, denser letter piles.
+The original prototypes used **TWK Lausanne** (commercial). For this open-source release, every project ships **Inter** (self-hosted from `assets/fonts/`) — no external font CDNs, no license issues.
+
+**Heads up:** the recorded demo videos still show TWK because they were captured pre-migration. Inter has wider metrics and a less geometric feel, so the live experience looks a little less polished than the videos. Every interaction and physics behavior is identical — only the letterforms differ. If you have a TWK Lausanne license and want the original look, drop the `.woff2` files into `assets/fonts/` and rename the `font-family` declarations.
