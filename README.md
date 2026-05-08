@@ -18,7 +18,7 @@ An experiment that originated from a p5.js practice — exploring the intersecti
 ```
 Experimental Todos/
 ├── assets/                      # Shared assets across all projects
-│   └── fonts/                   # Self-hosted Inter (.woff2, weights 200/300/400/500/600)
+│   └── fonts/                   # Self-hosted Inter (.woff2 + OFL.txt)
 │
 ├── mountain-todo/               # Vanilla JS todo app with mountain landscape
 │   ├── app.js                   # All application logic (~1200 lines)
@@ -29,7 +29,8 @@ Experimental Todos/
 ├── typographic-gravity/         # Interactive typing + physics canvas
 │   ├── sketch.js                # p5.js + Matter.js physics simulation
 │   ├── style.css                # Dark theme control panel styles
-└── └── index.html               # Main demo page (loads p5/Matter from cdnjs)
+│   ├── lib/                     # Self-hosted p5.min.js + matter.min.js
+└── └── index.html               # Main demo page
 ```
 
 ---
@@ -74,3 +75,11 @@ Both dev servers bind to `0.0.0.0` by default, so any device on the same WiFi ca
 The original prototypes used **TWK Lausanne** (commercial). For this open-source release, every project ships **Inter** (self-hosted from `assets/fonts/`) — no external font CDNs, no license issues.
 
 **Heads up:** the recorded demo videos still show TWK because they were captured pre-migration. Inter has wider metrics and a less geometric feel, so the live experience looks a little less polished than the videos. Every interaction and physics behavior is identical — only the letterforms differ. If you have a TWK Lausanne license and want the original look, drop the `.woff2` files into `assets/fonts/` and rename the `font-family` declarations.
+
+---
+
+## Credits
+
+- **Inter** — © The Inter Project Authors, [SIL Open Font License 1.1](./assets/fonts/OFL.txt)
+- **p5.js** — © Processing Foundation, [LGPL-2.1](https://github.com/processing/p5.js/blob/main/license.txt)
+- **Matter.js** — © Liam Brummitt, [MIT](https://github.com/liabru/matter-js/blob/master/LICENSE)

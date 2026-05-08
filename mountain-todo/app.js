@@ -2600,29 +2600,10 @@ function setup() {
     {
         const day = getDayData(AppState.currentDate);
         const defaultTodos = [
-            'Tensorlake Explorations #1',
-            'Tensorlake Explorations #2',
-            'Collect items from the mailbox',
-            'CVD Assignment + Reading',
-            'Talk to Prof. Raquel',
-            "Duke in LA - Karen's Midterm",
-            "Duke in LA - Karen's Essay",
-            'Project Blue - Full Screen Overheat',
-            'Project Blue - Building State',
-            'Project Blue - Level selection',
-            'Project Blue - Movement system',
-            'Duke in NY living preferences',
-            'OK Food Night',
-            'SVSD - Design Wrapped',
-            'Fellou.ai - Update #1',
-            'Fellou.ai - Update #2',
-            'talk to academic advisor',
-            'Send email to professor holly willis',
-            'Send email intro to professor Fred',
-            'OK - Big Reach-out #1',
-            'OK - Big Reach-out #2',
-            'OK - Big Reach-out #3',
-            'OK - Big Reach-out #4',
+            'Task 1',
+            'Task 2',
+            'Task 3',
+            'Task 4',
             ''
         ];
         for (const t of defaultTodos) {
